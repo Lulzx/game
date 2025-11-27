@@ -26,9 +26,9 @@ export class UI {
     updateMode(mode) {
         if (this.elements.mode) {
             const icons = {
-                walking: '🚶 Walking',
-                driving: '🚗 Driving',
-                indoor: '🏠 Indoors'
+                walking: 'ON FOOT',
+                driving: 'DRIVING',
+                indoor: 'INTERIOR'
             };
             this.elements.mode.textContent = icons[mode] || mode;
         }

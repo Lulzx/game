@@ -1,7 +1,7 @@
 export const characters = [
-    { name: 'Mike', emoji: '👔', color: 0x2244AA, message: "Yo, what's up? Looking for some action around here?" },
-    { name: 'Frank', emoji: '🧢', color: 0x44AA22, message: "Hey man, you need a ride? I know this city like the back of my hand." },
-    { name: 'Trevor', emoji: '🎸', color: 0xAA4422, message: "HAHA! You look lost, friend. Welcome to the chaos!" },
-    { name: 'Lester', emoji: '🤓', color: 0x888888, message: "I've got some intel... if you're interested in making some money." },
-    { name: 'Amanda', emoji: '💄', color: 0xFF6699, message: "This city has everything - beaches, mountains, opportunity..." }
+    { name: 'Mike', emoji: 'M', color: 0x2244AA, message: "Looking to make moves? This block never sleeps." },
+    { name: 'Frank', emoji: 'F', color: 0x44AA22, message: "Need wheels? I know the fastest lines through this city." },
+    { name: 'Trevor', emoji: 'T', color: 0xAA4422, message: "Stay unpredictable. Chaos keeps you alive." },
+    { name: 'Lester', emoji: 'L', color: 0x888888, message: "Got intel if you're ready to get paid." },
+    { name: 'Amanda', emoji: 'A', color: 0xFF6699, message: "Beaches to mountains—the city can make or break you." }
 ];

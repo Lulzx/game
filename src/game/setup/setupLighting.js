@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 export function setupLighting(scene) {
-    const ambient = new THREE.AmbientLight(0xFFF5E6, 0.6);
+    const ambient = new THREE.HemisphereLight(0xd9e7f2, 0x5b5d4c, 0.9);
     scene.add(ambient);
     
-    const sun = new THREE.DirectionalLight(0xFFE8D0, 1.5);
-    sun.position.set(150, 200, 100);
+    const sun = new THREE.DirectionalLight(0xfff3df, 1.65);
+    sun.position.set(160, 240, 120);
     sun.castShadow = true;
     sun.shadow.mapSize.width = 4096;
     sun.shadow.mapSize.height = 4096;
@@ -15,13 +15,15 @@ export function setupLighting(scene) {
     sun.shadow.camera.right = 200;
     sun.shadow.camera.top = 200;
     sun.shadow.camera.bottom = -200;
-    sun.shadow.bias = -0.0002;
+    sun.shadow.bias = -0.00025;
+    sun.shadow.normalBias = 0.08;
     scene.add(sun);
     
-    const fill = new THREE.DirectionalLight(0xA0D0E8, 0.4);
-    fill.position.set(-100, 80, -80);
+    const fill = new THREE.DirectionalLight(0x9bb5c5, 0.32);
+    fill.position.set(-140, 110, -100);
     scene.add(fill);
     
-    const hemi = new THREE.HemisphereLight(0x88BBDD, 0x557744, 0.4);
-    scene.add(hemi);
+    const rim = new THREE.PointLight(0xc8ecff, 0.18, 260);
+    rim.position.set(40, 90, -80);
+    scene.add(rim);
 }

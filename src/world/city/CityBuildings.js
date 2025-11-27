@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 export function generateBuildings(city) {
     const buildingColors = [
-        0x8899AA, 0x667788, 0x556677, 0x778899,
-        0x99AABB, 0xAABBCC, 0x445566, 0x6688AA
+        0x6b737c, 0x555f68, 0x4a525c, 0x7a858f,
+        0x8a939d, 0x9aa3ad, 0x4b5661, 0x5c6a78
     ];
     
     for (let bx = -3; bx <= 3; bx++) {
@@ -53,12 +53,16 @@ function createBuilding(city, x, z, width, height, depth, color) {
     body.receiveShadow = true;
     building.add(body);
     
-    const windowMat = new THREE.MeshStandardMaterial({
-        color: 0x88CCFF,
-        emissive: 0x224466,
-        emissiveIntensity: 0.3,
-        roughness: 0.1,
-        metalness: 0.8
+    const windowMat = new THREE.MeshPhysicalMaterial({
+        color: 0x6f9ec7,
+        emissive: 0x1d2f45,
+        emissiveIntensity: 0.25,
+        roughness: 0.08,
+        metalness: 0.92,
+        transmission: 0.5,
+        thickness: 0.35,
+        transparent: true,
+        opacity: 0.9
     });
     
     const windowRows = Math.floor(height / 3);

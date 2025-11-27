@@ -23,8 +23,9 @@ export class Ground {
         // Town square plaza (central circular area)
         const plazaGeo = new THREE.CircleGeometry(13, 40);
         const plazaMat = new THREE.MeshStandardMaterial({ 
-            color: 0xE8DCC8, 
-            roughness: 0.85 
+            color: 0x8e8b82, 
+            roughness: 0.9,
+            metalness: 0.05
         });
         const plaza = new THREE.Mesh(plazaGeo, plazaMat);
         plaza.rotation.x = -Math.PI / 2;
@@ -34,7 +35,7 @@ export class Ground {
         
         // Decorative plaza border
         const borderGeo = new THREE.TorusGeometry(13, 0.25, 8, 48);
-        const borderMat = new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.8 });
+        const borderMat = new THREE.MeshStandardMaterial({ color: 0x5a554a, roughness: 0.85 });
         const border = new THREE.Mesh(borderGeo, borderMat);
         border.rotation.x = -Math.PI / 2;
         border.position.y = 0.05;

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Materials } from '../core/Materials.js';
 
 /**
  * Water system with river, ocean, and animated waves
@@ -8,6 +9,11 @@ export class Water {
         this.scene = scene;
         this.waterMeshes = [];
         this.time = 0;
+        this.waveSettings = [
+            { direction: new THREE.Vector2(1, 0.4).normalize(), amplitude: 0.55, wavelength: 22, speed: 2.2 },
+            { direction: new THREE.Vector2(-0.6, 1).normalize(), amplitude: 0.35, wavelength: 16, speed: 1.6 },
+            { direction: new THREE.Vector2(0.25, 1).normalize(), amplitude: 0.22, wavelength: 12, speed: 1.9 }
+        ];
     }
     
     /**
@@ -24,13 +30,11 @@ export class Water {
      */
     createOcean() {
         const oceanGeo = new THREE.PlaneGeometry(400, 200, 64, 32);
-        const oceanMat = new THREE.MeshStandardMaterial({
-            color: 0x006994,
-            transparent: true,
-            opacity: 0.85,
-            roughness: 0.1,
-            metalness: 0.3
-        });
+        const oceanMat = Materials.water.clone();
+        oceanMat.color = new THREE.Color(0x185a72);
+        oceanMat.roughness = 0.06;
+        oceanMat.metalness = 0.45;
+        oceanMat.opacity = 0.95;
         
         const ocean = new THREE.Mesh(oceanGeo, oceanMat);
         ocean.rotation.x = -Math.PI / 2;
@@ -42,8 +46,9 @@ export class Water {
         // Beach
         const beachGeo = new THREE.PlaneGeometry(400, 30);
         const beachMat = new THREE.MeshStandardMaterial({
-            color: 0xC2B280,
-            roughness: 0.95
+            color: 0x8f7d63,
+            roughness: 0.94,
+            metalness: 0.02
         });
         const beach = new THREE.Mesh(beachGeo, beachMat);
         beach.rotation.x = -Math.PI / 2;
@@ -66,13 +71,11 @@ export class Water {
         }
         
         // Create river segments
-        const riverMat = new THREE.MeshStandardMaterial({
-            color: 0x3388AA,
-            transparent: true,
-            opacity: 0.8,
-            roughness: 0.1,
-            metalness: 0.2
-        });
+        const riverMat = Materials.water.clone();
+        riverMat.color = new THREE.Color(0x1d6a83);
+        riverMat.opacity = 0.88;
+        riverMat.transmission = 0.7;
+        riverMat.roughness = 0.12;
         
         for (let i = 0; i < riverPath.length - 1; i++) {
             const curr = riverPath[i];
@@ -165,13 +168,10 @@ export class Water {
      */
     createLake() {
         const lakeGeo = new THREE.CircleGeometry(30, 32);
-        const lakeMat = new THREE.MeshStandardMaterial({
-            color: 0x4499BB,
-            transparent: true,
-            opacity: 0.75,
-            roughness: 0.05,
-            metalness: 0.3
-        });
+        const lakeMat = Materials.water.clone();
+        lakeMat.color = new THREE.Color(0x1f708c);
+        lakeMat.opacity = 0.9;
+        lakeMat.roughness = 0.1;
         
         const lake = new THREE.Mesh(lakeGeo, lakeMat);
         lake.rotation.x = -Math.PI / 2;
@@ -182,7 +182,7 @@ export class Water {
         // Lake shore
         const shoreGeo = new THREE.RingGeometry(28, 35, 32);
         const shoreMat = new THREE.MeshStandardMaterial({
-            color: 0x8B7355,
+            color: 0x6b6152,
             roughness: 0.9
         });
         const shore = new THREE.Mesh(shoreGeo, shoreMat);
@@ -198,17 +198,31 @@ export class Water {
         this.time += deltaTime;
         
         this.waterMeshes.forEach(({ mesh, type }) => {
-            if (type === 'ocean') {
-                // Ocean waves
-                const positions = mesh.geometry.attributes.position.array;
-                for (let i = 0; i < positions.length; i += 3) {
-                    const x = positions[i];
-                    const y = positions[i + 1];
-                    positions[i + 2] = Math.sin(x * 0.05 + this.time * 2) * 0.5 +
-                                        Math.sin(y * 0.03 + this.time * 1.5) * 0.3;
-                }
-                mesh.geometry.attributes.position.needsUpdate = true;
+            if (type === 'river') {
+                mesh.material.opacity = 0.86 + Math.sin(this.time * 0.9) * 0.02;
+                return;
             }
+            
+            const waveScale = type === 'lake' ? 0.35 : 1;
+            const positions = mesh.geometry.attributes.position;
+            const array = positions.array;
+            
+            for (let i = 0; i < array.length; i += 3) {
+                const x = array[i];
+                const y = array[i + 1];
+                
+                let displacement = 0;
+                for (const wave of this.waveSettings) {
+                    const k = (Math.PI * 2) / wave.wavelength;
+                    const phase = k * (wave.direction.x * x + wave.direction.y * y) + this.time * wave.speed;
+                    displacement += Math.sin(phase) * wave.amplitude * waveScale;
+                }
+                
+                array[i + 2] = displacement;
+            }
+            
+            positions.needsUpdate = true;
+            mesh.geometry.computeVertexNormals();
         });
     }
     

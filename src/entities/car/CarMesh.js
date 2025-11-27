@@ -121,13 +121,19 @@ export function buildCarModel() {
     rightTail.position.set(0.8, 0.65, -1.9);
     group.add(rightTail);
     
-    // Cute face - eyes as headlights, smile
-    const smileGeo = new THREE.TorusGeometry(0.25, 0.04, 8, 16, Math.PI);
-    const smileMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const smile = new THREE.Mesh(smileGeo, smileMat);
-    smile.position.set(0, 0.38, 1.91);
-    smile.rotation.x = Math.PI;
-    group.add(smile);
+    const grille = new THREE.Mesh(
+        new THREE.BoxGeometry(1.4, 0.22, 0.06),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.6, roughness: 0.25 })
+    );
+    grille.position.set(0, 0.38, 1.93);
+    group.add(grille);
+    
+    const splitter = new THREE.Mesh(
+        new THREE.BoxGeometry(2.4, 0.08, 0.2),
+        new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.5, roughness: 0.3 })
+    );
+    splitter.position.set(0, 0.2, 1.75);
+    group.add(splitter);
     
     return { group, wheels, bodyMesh };
 }
