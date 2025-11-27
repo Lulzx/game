@@ -1,0 +1,234 @@
+import * as THREE from 'three';
+
+/**
+ * Water system with river, ocean, and animated waves
+ */
+export class Water {
+    constructor(scene) {
+        this.scene = scene;
+        this.waterMeshes = [];
+        this.time = 0;
+    }
+    
+    /**
+     * Generate all water bodies
+     */
+    generate() {
+        this.createOcean();
+        this.createRiver();
+        this.createLake();
+    }
+    
+    /**
+     * Create ocean at the edge of the map
+     */
+    createOcean() {
+        const oceanGeo = new THREE.PlaneGeometry(400, 200, 64, 32);
+        const oceanMat = new THREE.MeshStandardMaterial({
+            color: 0x006994,
+            transparent: true,
+            opacity: 0.85,
+            roughness: 0.1,
+            metalness: 0.3
+        });
+        
+        const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+        ocean.rotation.x = -Math.PI / 2;
+        ocean.position.set(0, -1, 350);
+        ocean.receiveShadow = true;
+        this.scene.add(ocean);
+        this.waterMeshes.push({ mesh: ocean, type: 'ocean' });
+        
+        // Beach
+        const beachGeo = new THREE.PlaneGeometry(400, 30);
+        const beachMat = new THREE.MeshStandardMaterial({
+            color: 0xC2B280,
+            roughness: 0.95
+        });
+        const beach = new THREE.Mesh(beachGeo, beachMat);
+        beach.rotation.x = -Math.PI / 2;
+        beach.position.set(0, 0.05, 240);
+        beach.receiveShadow = true;
+        this.scene.add(beach);
+    }
+    
+    /**
+     * Create winding river
+     */
+    createRiver() {
+        const riverPath = [];
+        const riverWidth = 25;
+        
+        // Generate river path using sine wave
+        for (let z = -300; z <= 250; z += 10) {
+            const x = Math.sin(z * 0.01) * 50 + 100;
+            riverPath.push({ x, z });
+        }
+        
+        // Create river segments
+        const riverMat = new THREE.MeshStandardMaterial({
+            color: 0x3388AA,
+            transparent: true,
+            opacity: 0.8,
+            roughness: 0.1,
+            metalness: 0.2
+        });
+        
+        for (let i = 0; i < riverPath.length - 1; i++) {
+            const curr = riverPath[i];
+            const next = riverPath[i + 1];
+            
+            const length = Math.sqrt(
+                Math.pow(next.x - curr.x, 2) + Math.pow(next.z - curr.z, 2)
+            );
+            const angle = Math.atan2(next.x - curr.x, next.z - curr.z);
+            
+            const segment = new THREE.Mesh(
+                new THREE.PlaneGeometry(riverWidth, length + 2),
+                riverMat
+            );
+            segment.rotation.x = -Math.PI / 2;
+            segment.rotation.z = -angle;
+            segment.position.set(
+                (curr.x + next.x) / 2,
+                -0.5,
+                (curr.z + next.z) / 2
+            );
+            this.scene.add(segment);
+            this.waterMeshes.push({ mesh: segment, type: 'river' });
+        }
+        
+        // River banks
+        this.createRiverBanks(riverPath, riverWidth);
+    }
+    
+    /**
+     * Create river banks with vegetation
+     */
+    createRiverBanks(riverPath, width) {
+        const bankMat = new THREE.MeshStandardMaterial({ color: 0x3D5C3D });
+        
+        riverPath.forEach((point, i) => {
+            if (i % 3 !== 0) return;
+            
+            // Left bank
+            const leftBank = new THREE.Mesh(
+                new THREE.CircleGeometry(3 + Math.random() * 2, 8),
+                bankMat
+            );
+            leftBank.rotation.x = -Math.PI / 2;
+            leftBank.position.set(point.x - width / 2 - 3, 0.03, point.z);
+            this.scene.add(leftBank);
+            
+            // Right bank  
+            const rightBank = new THREE.Mesh(
+                new THREE.CircleGeometry(3 + Math.random() * 2, 8),
+                bankMat
+            );
+            rightBank.rotation.x = -Math.PI / 2;
+            rightBank.position.set(point.x + width / 2 + 3, 0.03, point.z);
+            this.scene.add(rightBank);
+            
+            // Occasional trees
+            if (Math.random() > 0.7) {
+                this.createRiverTree(point.x - width / 2 - 8, point.z);
+            }
+            if (Math.random() > 0.7) {
+                this.createRiverTree(point.x + width / 2 + 8, point.z);
+            }
+        });
+    }
+    
+    createRiverTree(x, z) {
+        const tree = new THREE.Group();
+        
+        const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.3, 2),
+            new THREE.MeshStandardMaterial({ color: 0x4A3728 })
+        );
+        trunk.position.y = 1;
+        tree.add(trunk);
+        
+        const foliage = new THREE.Mesh(
+            new THREE.ConeGeometry(1.5, 3, 8),
+            new THREE.MeshStandardMaterial({ color: 0x2D5A27 })
+        );
+        foliage.position.y = 3.5;
+        tree.add(foliage);
+        
+        tree.position.set(x, 0, z);
+        this.scene.add(tree);
+    }
+    
+    /**
+     * Create a small lake
+     */
+    createLake() {
+        const lakeGeo = new THREE.CircleGeometry(30, 32);
+        const lakeMat = new THREE.MeshStandardMaterial({
+            color: 0x4499BB,
+            transparent: true,
+            opacity: 0.75,
+            roughness: 0.05,
+            metalness: 0.3
+        });
+        
+        const lake = new THREE.Mesh(lakeGeo, lakeMat);
+        lake.rotation.x = -Math.PI / 2;
+        lake.position.set(-180, -0.3, -150);
+        this.scene.add(lake);
+        this.waterMeshes.push({ mesh: lake, type: 'lake' });
+        
+        // Lake shore
+        const shoreGeo = new THREE.RingGeometry(28, 35, 32);
+        const shoreMat = new THREE.MeshStandardMaterial({
+            color: 0x8B7355,
+            roughness: 0.9
+        });
+        const shore = new THREE.Mesh(shoreGeo, shoreMat);
+        shore.rotation.x = -Math.PI / 2;
+        shore.position.set(-180, 0.02, -150);
+        this.scene.add(shore);
+    }
+    
+    /**
+     * Animate water
+     */
+    update(deltaTime) {
+        this.time += deltaTime;
+        
+        this.waterMeshes.forEach(({ mesh, type }) => {
+            if (type === 'ocean') {
+                // Ocean waves
+                const positions = mesh.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    const x = positions[i];
+                    const y = positions[i + 1];
+                    positions[i + 2] = Math.sin(x * 0.05 + this.time * 2) * 0.5 +
+                                        Math.sin(y * 0.03 + this.time * 1.5) * 0.3;
+                }
+                mesh.geometry.attributes.position.needsUpdate = true;
+            }
+        });
+    }
+    
+    /**
+     * Check if position is in water
+     */
+    isInWater(x, z) {
+        // Check river
+        const riverX = Math.sin(z * 0.01) * 50 + 100;
+        if (Math.abs(x - riverX) < 12 && z > -300 && z < 250) {
+            return true;
+        }
+        
+        // Check ocean
+        if (z > 250) return true;
+        
+        // Check lake
+        const lakeDist = Math.sqrt(Math.pow(x + 180, 2) + Math.pow(z + 150, 2));
+        if (lakeDist < 28) return true;
+        
+        return false;
+    }
+}
